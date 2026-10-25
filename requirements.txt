@@ -1,0 +1,4 @@
+aiogram>=3.13
+yt-dlp>=2026.10.21
+python-dotenv>=1.0
+httpx>=0.27

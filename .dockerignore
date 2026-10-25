@@ -1,0 +1,14 @@
+.env
+.env.*
+!.env.example
+cookies*.txt
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+downloads/
+*.log
+.claude/
+.vscode/
+.idea/
+.git/
