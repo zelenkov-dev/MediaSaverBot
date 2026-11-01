@@ -10,6 +10,9 @@ from .errors import MediaTooLarge
 
 TELEGRAM_VIDEO_LIMIT = 50 * 1024 * 1024
 TELEGRAM_PHOTO_LIMIT = 10 * 1024 * 1024
+TELEGRAM_CAPTION_LIMIT = 1024
+
+Downloaded = tuple[str, str, str | None]
 
 IMAGE_EXTS = {".jpg", ".jpeg", ".png", ".webp", ".gif", ".heic"}
 
@@ -37,13 +40,21 @@ def classify(path: str) -> str:
     return "photo" if os.path.getsize(path) <= TELEGRAM_PHOTO_LIMIT else "document"
 
 
-def finalize(path: str | Path, source_url: str) -> tuple[str, str]:
+def trim_caption(text: str | None) -> str | None:
+    text = (text or "").strip()
+    encoded = text.encode("utf-16-le")
+    if len(encoded) <= TELEGRAM_CAPTION_LIMIT * 2:
+        return text or None
+    return encoded[: (TELEGRAM_CAPTION_LIMIT - 1) * 2].decode("utf-16-le", "ignore").rstrip() + "…"
+
+
+def finalize(path: str | Path, source_url: str, caption: str | None = None) -> Downloaded:
     path = str(path)
     kind = classify(path)
     if kind == "video" and os.path.getsize(path) > TELEGRAM_VIDEO_LIMIT:
         cleanup(path)
         raise MediaTooLarge(source_url)
-    return path, kind
+    return path, kind, trim_caption(caption)
 
 
 def cleanup(path: str | None) -> None:

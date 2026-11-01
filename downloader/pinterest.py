@@ -8,14 +8,14 @@ import httpx
 
 from config import DOWNLOAD_DIR
 
-from .common import BROWSER_UA, IMAGE_EXTS, compact_json, finalize, save_stream
+from .common import BROWSER_UA, IMAGE_EXTS, Downloaded, compact_json, finalize, save_stream
 from .errors import DownloadFailed, as_download_failed
 
 _PIN_ID_RE = re.compile(r"/pin/(?:[\w-]+--)?(\d+)")
 _API_URL = "https://www.pinterest.com/resource/PinResource/get/"
 
 
-def download(url: str) -> tuple[str, str]:
+def download(url: str) -> Downloaded:
     headers = {"User-Agent": BROWSER_UA}
     with as_download_failed(), httpx.Client(follow_redirects=True, timeout=30, headers=headers) as client:
         pin_id = _resolve_pin_id(client, url)

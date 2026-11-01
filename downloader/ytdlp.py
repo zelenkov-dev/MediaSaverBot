@@ -6,8 +6,9 @@ from yt_dlp import YoutubeDL
 
 from config import COOKIES_FILE, DOWNLOAD_DIR
 
-from .common import TELEGRAM_VIDEO_LIMIT, finalize
+from .common import TELEGRAM_VIDEO_LIMIT, Downloaded, finalize
 from .errors import DownloadFailed, MediaTooLarge
+from .links import platform_of
 
 
 class _SilentLogger:
@@ -35,7 +36,7 @@ def options() -> dict:
     return options
 
 
-def download(url: str) -> tuple[str, str]:
+def download(url: str) -> Downloaded:
     with YoutubeDL(options()) as ydl:
         info = ydl.extract_info(url, download=True)
 
@@ -46,4 +47,5 @@ def download(url: str) -> tuple[str, str]:
     path = downloads[0].get("filepath")
     if not path or not os.path.exists(path):
         raise DownloadFailed("yt-dlp did not produce a file")
-    return finalize(path, url)
+    caption = info.get("description") if platform_of(url) == "instagram" else None
+    return finalize(path, url, caption)

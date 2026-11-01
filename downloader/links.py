@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import re
+from collections.abc import Iterator
 from urllib.parse import urlparse
 
 _URL_RE = re.compile(r"https?://[^\s<>\"']+", re.IGNORECASE)
@@ -27,9 +28,10 @@ def platform_of(url: str) -> str | None:
     return None
 
 
-def find_media_url(text: str | None) -> str | None:
+def iter_urls(text: str | None) -> Iterator[str]:
     for match in _URL_RE.findall(text or ""):
-        url = match.rstrip(_TRAILING_PUNCTUATION)
-        if platform_of(url):
-            return url
-    return None
+        yield match.rstrip(_TRAILING_PUNCTUATION)
+
+
+def find_media_url(text: str | None) -> str | None:
+    return next((url for url in iter_urls(text) if platform_of(url)), None)

@@ -1,15 +1,28 @@
 # MediaSaver
 
-A Telegram bot for group chats: when someone posts a link to
-**YouTube Shorts / TikTok / Instagram / Pinterest**, it downloads the video or
-image and sends it straight to the chat.
+A Telegram bot for group chats:
+
+- when someone posts a link to **YouTube Shorts / TikTok / Instagram /
+  Pinterest**, it downloads the video or image and sends it straight to the chat;
+- when someone posts an **AUTO.RIA** car listing, it replies with an album of
+  up to 5 photos, the price and key specs;
+- when someone posts a song from **Spotify / Apple Music / YouTube Music /
+  Deezer**, it replies with links to the same song on the other services.
 
 ## Structure
 
 | File                         | Purpose                                              |
 |------------------------------|------------------------------------------------------|
-| `bot.py`                     | Entry point: handlers and startup                    |
+| `bot.py`                     | Entry point: logging and startup                     |
 | `config.py`                  | Loads settings from `.env`                           |
+| `handlers/media.py`          | Replies to media links with the downloaded file      |
+| `handlers/listing.py`        | Replies to listing links with a photo album          |
+| `handlers/music.py`          | Replies to song links with links on other services   |
+| `music/sources.py`           | Gets artist and title from the shared song link      |
+| `music/targets.py`           | Finds the song on Apple Music / Deezer, search links |
+| `music/song.py`              | `Song` model and reply format                        |
+| `listings/autoria.py`        | Parses an AUTO.RIA listing page (specs and photos)   |
+| `listings/listing.py`        | `Listing` model and caption format                   |
 | `downloader/__init__.py`     | `download_media()`: yt-dlp first, then fallbacks     |
 | `downloader/links.py`        | Finds supported links and detects the platform       |
 | `downloader/ytdlp.py`        | Video download via yt-dlp                            |
@@ -17,6 +30,7 @@ image and sends it straight to the chat.
 | `downloader/pinterest.py`    | Pinterest fallback (image pins) via public API       |
 | `downloader/common.py`       | Shared helpers: file type, size limits, cleanup      |
 | `downloader/errors.py`       | `DownloadFailed` / `MediaTooLarge` exceptions        |
+| `downloader/reasons.py`      | Turns download errors into a reason users understand |
 
 ## Setup
 
@@ -72,6 +86,8 @@ To update yt-dlp (platforms change often), rebuild without cache:
 
 - **Video size limit is 50 MB** (Telegram Bot API restriction). Larger videos
   are skipped with an error message.
+- **Instagram captions:** posts are sent with their original description, cut
+  to Telegram's 1024-character caption limit.
 - **Instagram:** public photo posts are fetched without login. Videos and
   private/restricted content may require authentication — export a
   `cookies.txt` file (Netscape format) and set its path in `.env` via the

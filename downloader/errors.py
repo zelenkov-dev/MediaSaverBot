@@ -12,6 +12,10 @@ class MediaTooLarge(Exception):
     pass
 
 
+class UnsupportedMedia(DownloadFailed):
+    pass
+
+
 @contextmanager
 def as_download_failed() -> Iterator[None]:
     try:
